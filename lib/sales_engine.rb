@@ -3,7 +3,6 @@ require_relative 'merchant_repository'
 require_relative 'sales_analysis'
 
 class SalesEngine
-
   attr_reader :path
 
   def initialize(path)
@@ -19,7 +18,7 @@ class SalesEngine
   end
 
   def self.from_csv(path)
-    se = SalesEngine.new(path)
+    new(path)
   end
 end
 

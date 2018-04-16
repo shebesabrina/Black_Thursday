@@ -1,41 +1,59 @@
+# Frozen_string_literal: true
+
 require 'CSV'
-
+require_relative 'merchant'
+require_relative 'repository'
+# Merchant Repository
 class MerchantRepository
-  attr_reader :contents,
+  attr_reader :merchants,
               :parent
-
+  include Repository
   def initialize(path, parent)
-    @contents = []
+    @merchants = {}
     @parent = parent
     load_path(path)
   end
 
   def load_path(path)
     CSV.foreach(path, headers: true, header_converters: :symbol) do |row|
-      @contents << Merchant.new(row, self)
+      @merchants[row[:id].to_i] = Merchant.new(row, self)
     end
   end
 
   def all
-    @contents
+    @merchants.values
   end
 
   def find_by_id(id)
-    @contents.find do |row|
-      row.id == id
-    end
+    @merchants[id]
   end
 
   def find_by_name(name)
-    @contents.find do |row|
-      row.name == name
-    end
+    all.find { |merchant| merchant.name.downcase == name.downcase }
   end
 
   def find_all_by_name(name)
-    @contents.find_all do |row|
-      row.downcase == name.downcase
+    all.find_all do |merchant|
+      merchant.name.downcase.include?(name.downcase)
     end
   end
 
+  def create(attributes)
+    max_id = @merchants.keys.max + 1
+    attributes[:id] = max_id
+    @merchants[:max] = Merchant.new(attributes, self)
+
+  end
+
+  def update(id, attributes)
+    @merchants[id] = attributes
+  end
+
+  def delete(id)
+    @merchants.delete(id)
+  end
+
+  def inspect
+   "#<#{self.class} #{@merchants.size} rows>"
+  end
 end
